@@ -6,6 +6,8 @@ import joblib
 from datetime import datetime
 import xgboost as xgb
 from skops.io import load
+import os
+
 
 pd.set_option('future.no_silent_downcasting', True)
 
@@ -31,6 +33,14 @@ xgb_model = xgb.Booster()
 xgb_model.load_model("best_xgb_model.json")
 gbm_model = joblib.load("best_gbm_model.pkl")
 preprocessor = load("preprocessor.skops", trusted=trusted_types)
+# Path to shared history file
+history_path = "shared_prediction_history.csv"
+
+# Load existing shared history
+if os.path.exists(history_path):
+    shared_history = pd.read_csv(history_path)
+else:
+    shared_history = pd.DataFrame()
 
 # --- Streamlit Page Setup ---
 st.set_page_config(page_title="⚡ Energy AI", page_icon="⚡", layout="wide")
@@ -54,9 +64,8 @@ with st.sidebar:
     ⚠️ This tool is a predictive AI system trained with advanced ML models.
     """)
 
-# Initialize session state variable
-if "prediction_history" not in st.session_state:
-    st.session_state["prediction_history"] = pd.DataFrame()
+
+
 
 # --- Input Form ---
 st.subheader("📥 Enter Input Parameters")
@@ -87,7 +96,7 @@ if submitted:
     day_of_week = now.strftime('%A')
 
     # Historical lag fallback
-    hist_df = st.session_state.prediction_history
+    hist_df = shared_history
     lag_1 = safe_lag(hist_df, 1, 75.0)
     lag_2 = safe_lag(hist_df, 2, 75.0)
     lag_24 = safe_lag(hist_df, 24, 75.0)
@@ -133,8 +142,8 @@ if submitted:
     new_row = input_data.copy()
     new_row["PredictedEnergy"] = final_prediction
     new_row["Timestamp"] = timestamp
-    st.session_state.prediction_history = pd.concat(
-        [st.session_state.prediction_history, new_row], ignore_index=True)
+    shared_history = pd.concat([shared_history, new_row], ignore_index=True)
+    shared_history.to_csv(history_path, index=False)
 
     # 8. Plot input breakdown
     if show_plot:
@@ -155,7 +164,7 @@ if submitted:
     st.markdown("---")
     st.subheader("📊 Energy Forecast Over Time")
     fig = px.line(
-        st.session_state.prediction_history,
+        shared_history,
         x="Timestamp", y="PredictedEnergy",
         title="Predicted Energy Consumption",
         markers=True
