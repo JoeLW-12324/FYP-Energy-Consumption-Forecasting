@@ -117,7 +117,8 @@ if submitted:
     input_processed = preprocessor.transform(input_data)
 
     # 5. Predict from both models
-    pred_xgb = xgb_model.predict(input_processed)
+    dinput = xgb.DMatrix(input_processed)
+    pred_xgb = xgb_model.predict(dinput)
     pred_gbm = gbm_model.predict(input_processed)
 
     # 6. Average predictions
