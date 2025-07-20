@@ -1,5 +1,6 @@
-streamlit
-streamlit-lottie
-pandas
-matplotlib
-plotly
+streamlit~=1.45.1
+pandas~=2.3.0
+numpy~=2.3.0
+plotly~=6.1.2
+joblib~=1.5.1
+skops~=0.11.0
