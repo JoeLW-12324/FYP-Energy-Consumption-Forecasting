@@ -4,6 +4,7 @@ import numpy as np
 import plotly.express as px
 import joblib
 from datetime import datetime
+import xgboost as xgb
 from skops.io import load
 
 trusted_types = [
@@ -13,7 +14,7 @@ trusted_types = [
 
 # Custom transformer to map On/Off and Yes/No to 1/0
 def binary_map(X):
-    return X.replace({'On': 1, 'Off': 0, 'Yes': 1, 'No': 0}).astype(int)
+    return X.replace({'On': 1, 'Off': 0, 'Yes': 1, 'No': 0}).infer_objects(copy=False).astype(int)
 
 # for implementing safe lag features
 def safe_lag(df, lag, default):
@@ -24,7 +25,8 @@ def safe_lag(df, lag, default):
 
 
 # Load models and preprocessors
-xgb_model = joblib.load("best_xgb_model.pkl")
+xgb_model = xgb.Booster()
+xgb_model.load_model("best_xgb_model.json")
 gbm_model = joblib.load("best_gbm_model.pkl")
 preprocessor = load("preprocessor.skops", trusted=trusted_types)
 
