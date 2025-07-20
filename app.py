@@ -7,6 +7,8 @@ from datetime import datetime
 import xgboost as xgb
 from skops.io import load
 
+pd.set_option('future.no_silent_downcasting', True)
+
 trusted_types = [
     "__main__.binary_map",
     "sklearn.compose._column_transformer._RemainderColsList"
