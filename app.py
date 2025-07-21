@@ -36,8 +36,7 @@ preprocessor = load("preprocessor.skops", trusted=trusted_types)
 # Path to shared history file
 history_path = "shared_prediction_history.csv"
 
-# Load existing shared history
-if os.path.exists(history_path):
+if os.path.exists(history_path) and os.path.getsize(history_path) > 0:
     shared_history = pd.read_csv(history_path)
 else:
     shared_history = pd.DataFrame()
